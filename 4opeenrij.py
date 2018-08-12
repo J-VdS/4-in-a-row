@@ -13,6 +13,7 @@ class VOR:
         self.speler = 'A'
         self.color = {'A':'yellow', 'B':'red'}
         self.canvas.bind_all('<Button-1>', self.zet)
+        self.extra()
         
         try:
             self.scherm()
@@ -43,7 +44,12 @@ class VOR:
         self.canvas.create_oval(50*x, 50*y, 50*(x+1), 50*(y+1), width=2, \
                                 fill=self.color[self.speler])
         
-        self.winnaar = self.win(self.speler)
+        if self.win(self.speler):
+            self.canvas.create_text(self.canvas.winfo_width()//2, 6*50,
+                                    anchor='n', font=('Calibri',12),
+                                    text='Player %s won!' %(self.speler))
+            self.tk.update()
+            self.winnaar = True
         self.speler = 'A' if (self.speler == 'B') else 'B'
 
     def win(self, speler):
@@ -70,11 +76,6 @@ class VOR:
                 if self.veld[7*y+x:7*y+x+25:8] == speler*4:
                     return True
 
-
-        
-
-        
-
         return False
                 
 
@@ -87,6 +88,17 @@ class VOR:
             except Exception as e:
                 return e
             time.sleep(0.1)
+    
+    def restart(self):
+        pass
+     
+    def __str__(self):
+        return (self.veld, self.speler)
+    
+    def extra(self):
+        self.b1 = Button(self.tk, text='Restart', command=self.restart, 
+                         font=('calibri', 8), width=7)
+        self.b1.place(x=0, y=300)
 
 
 if __name__ ==  '__main__':
