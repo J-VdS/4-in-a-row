@@ -1,5 +1,6 @@
 from tkinter import *
 import time
+#import copy #necessary for undo method
 
 class VOR:
     def __init__(self, tk):
@@ -10,10 +11,11 @@ class VOR:
         self.tk.update()
         
         self.veld = 'E'*42
+        self.veld_copy = [None, None]
         self.winnaar = None
-        self.speler = 'A'
-        self.color = {'A':'yellow', 'B':'red'}
-        self.scores = {'A':0, 'B':0}
+        self.speler = 'Y'
+        self.color = {'Y':'yellow', 'R':'red'}
+        self.scores = {'Y':0, 'R':0}
         self.canvas.bind_all('<Button-1>', self.zet)
         self.extra()
         
@@ -29,34 +31,39 @@ class VOR:
             for j in range(7):
                 self.canvas.create_rectangle(50*j, 50*i, 50*(j+1), 50*(i+1))
         self.canvas.create_text(self.canvas.winfo_width(), self.canvas.winfo_height(),
-                            text='A: %2s B: %2s ' %(self.scores['A'], self.scores['B']),
+                            text='Y: %2s R: %2s ' %(self.scores['Y'], self.scores['R']),
                             anchor='se')
+        self.msg = self.canvas.create_text(self.canvas.winfo_width()//2, 
+                                           self.canvas.winfo_height(),
+                                           anchor='s', font=('Calibri',12),
+                                           text=self.speler + ' starts')
         self.tk.update()
         return
 
     def zet(self, evt):
         if self.winnaar or self.veld.count('E') == 0:
             return
+        elif (self.tk.winfo_pointery() - self.tk.winfo_rooty()) > 300:
+            return
         x = (self.tk.winfo_pointerx() - self.tk.winfo_rootx())//50
+        
         y = self.veld[x::7].count('E')-1
         if y < 0:
             return 
+        self.veld_copy[0] = self.veld[:]
         self.veld = self.veld[:y*7+x]+self.speler+self.veld[y*7+x+1:]
-        '''
-        for i in range(6):
-            print(self.veld[7*i:7*i+7])'''
+
         #tekent bolletje
-        self.canvas.create_oval(50*x, 50*y, 50*(x+1), 50*(y+1), width=2, \
-                                fill=self.color[self.speler])
+        self.veld_copy[1] =self.canvas.create_oval(50*x, 50*y, 50*(x+1), 50*(y+1),
+                      width=2, fill=self.color[self.speler])
+        
         
         if self.win(self.speler):
-            self.canvas.create_text(self.canvas.winfo_width()//2, 6*50,
-                                    anchor='n', font=('Calibri',12),
-                                    text='Player %s won!' %(self.speler))
+            self.canvas.itemconfig(self.msg, text='Player %s won!' %(self.speler))
             self.scores[self.speler] += 1
             self.tk.update()
             self.winnaar = True
-        self.speler = 'A' if (self.speler == 'B') else 'B'
+        self.speler = 'Y' if (self.speler == 'R') else 'R'
 
     def win(self, speler):
         #horizontaal:
@@ -95,21 +102,31 @@ class VOR:
                 return e
             time.sleep(0.1)
     
+    
     def restart(self):
         self.canvas.delete('all')
+        self.speler = 'Y' if ((self.scores['Y']+ self.scores['R'])%2 == 0) else 'R'
         self.scherm()
-        self.speler = 'A'
         self.veld = 'E'*42
         self.winnaar = False
+        return
+    
+    
+    def undo(self):
+        if self.veld_copy[1]:
+            self.veld = self.veld_copy[0]
+            self.canvas.delete(self.veld_copy[1])
+            self.veld_copy[1] = 1
+            self.speler = 'Y' if (self.speler == 'R') else 'R'
         
-     
-    def __str__(self):
-        return (self.veld, self.speler)
     
     def extra(self):
-        self.b1 = Button(self.tk, text='Restart', command=self.restart, 
+        self.b1 = Button(self.tk, text='RESTART', command=self.restart, 
                          font=('calibri', 8), width=7)
         self.b1.place(x=0, y=300)
+        self.b2 = Button(self.tk, text='UNDO', command=self.undo,
+                         font=('calibri', 8), width=7)
+        self.b2.place(x=50, y=300)
 
 
 if __name__ ==  '__main__':
