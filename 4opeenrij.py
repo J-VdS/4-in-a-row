@@ -7,11 +7,13 @@ class VOR:
         self.canvas = Canvas(self.tk, width=351, height=320, highlightthickness=0,\
                              bd=0)
         self.canvas.pack()
+        self.tk.update()
         
         self.veld = 'E'*42
         self.winnaar = None
         self.speler = 'A'
         self.color = {'A':'yellow', 'B':'red'}
+        self.scores = {'A':0, 'B':0}
         self.canvas.bind_all('<Button-1>', self.zet)
         self.extra()
         
@@ -26,11 +28,14 @@ class VOR:
         for i in range(6):
             for j in range(7):
                 self.canvas.create_rectangle(50*j, 50*i, 50*(j+1), 50*(i+1))
+        self.canvas.create_text(self.canvas.winfo_width(), self.canvas.winfo_height(),
+                            text='A: %2s B: %2s ' %(self.scores['A'], self.scores['B']),
+                            anchor='se')
         self.tk.update()
         return
 
     def zet(self, evt):
-        if self.winnaar:
+        if self.winnaar or self.veld.count('E') == 0:
             return
         x = (self.tk.winfo_pointerx() - self.tk.winfo_rootx())//50
         y = self.veld[x::7].count('E')-1
@@ -48,6 +53,7 @@ class VOR:
             self.canvas.create_text(self.canvas.winfo_width()//2, 6*50,
                                     anchor='n', font=('Calibri',12),
                                     text='Player %s won!' %(self.speler))
+            self.scores[self.speler] += 1
             self.tk.update()
             self.winnaar = True
         self.speler = 'A' if (self.speler == 'B') else 'B'
@@ -90,7 +96,12 @@ class VOR:
             time.sleep(0.1)
     
     def restart(self):
-        pass
+        self.canvas.delete('all')
+        self.scherm()
+        self.speler = 'A'
+        self.veld = 'E'*42
+        self.winnaar = False
+        
      
     def __str__(self):
         return (self.veld, self.speler)
