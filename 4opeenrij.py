@@ -59,7 +59,7 @@ class VOR:
         
         
         if self.win(self.speler):
-            self.canvas.itemconfig(self.msg, text='Player %s won!' %(self.speler))
+            self.canvas.itemconfig(self.msg, text='%s won!' %(self.speler))
             self.scores[self.speler] += 1
             self.tk.update()
             self.winnaar = True
@@ -113,7 +113,10 @@ class VOR:
     
     
     def undo(self):
-        if self.veld_copy[1]:
+        if self.winnaar:
+            print('ERROR: Not possible to use undo if somebody won already')
+            return
+        elif self.veld_copy[1]:
             self.veld = self.veld_copy[0]
             self.canvas.delete(self.veld_copy[1])
             self.veld_copy[1] = 1
