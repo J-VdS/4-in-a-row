@@ -3,6 +3,7 @@
 ### Todo:
   * (add arrows)
   * (online multiplayer support)
+  * AI support
 
 ### Done:
   * Restart button
